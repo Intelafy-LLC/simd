@@ -45,7 +45,7 @@ body1:
 	ADDQ    $0x01, R8 // add 1 to offset
 	SUBQ    $0x01, R9 // subtract from count
 	CMPQ    R9, $0x01 // do we have at least 1 byte remaining?
-	JGE     body8
+	JGE     body1
 
 done:
 	MOVQ R15, ret+24(FP) // Return counts
