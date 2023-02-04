@@ -4,7 +4,7 @@
 // Requires: AVX, AVX2
 TEXT ·x64ones(SB), NOSPLIT, $0-24
 	MOVQ     a_base+0(FP), R8         // load address of a
-	MOVQ     a_base+8(FP), R11        // load length of a
+	MOVQ     a_len+8(FP), R11        // load length of a
 	MOVQ     $0xffffffffffffffff, R13 // set R13 to all 1's
 	VPCMPEQQ Y1, Y1, Y2               // Set all bits to 1
 
@@ -62,7 +62,7 @@ done:
 // Requires: AVX, AVX2
 TEXT ·x64zero(SB), NOSPLIT, $0-24
 	MOVQ  a_base+0(FP), R8  // load address of a
-	MOVQ  a_base+8(FP), R11 // load length of a
+	MOVQ  a_len+8(FP), R11 // load length of a
 	MOVQ  $0x0, R13         // set R13 to all 1's
 	VPXOR Y2, Y2, Y2        // clear Y2
 

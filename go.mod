@@ -1,4 +1,4 @@
-module "github.com/Intelafy-LLC/simd"
+module github.com/Intelafy-LLC/simd
 
 go 1.19
 

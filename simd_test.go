@@ -192,7 +192,7 @@ func Test_bitmap(t *testing.T) {
 
 	start := time.Now()
 	_a := GetBitMap(a)
-	for _, v := range [][]byte{b,c, d, e, f, g, h, i} {
+	for _, v := range [][]byte{b, c, d, e, f, g, h, i} {
 		_v := GetBitMap(v)
 		_a.And(_v)
 		//AvxAnd(a, v, target)
@@ -200,9 +200,7 @@ func Test_bitmap(t *testing.T) {
 	elapsed := time.Since(start)
 	log.Printf("elasped: %s\n", elapsed)
 
-
 }
-
 
 func Test_mybitmap(t *testing.T) {
 	a := make([]byte, 31250007)
@@ -226,14 +224,13 @@ func Test_mybitmap(t *testing.T) {
 	rand.Read(i)
 
 	start := time.Now()
-	for _, v := range [][]byte{b,c, d, e, f, g, h, i} {
+	for _, v := range [][]byte{b, c, d, e, f, g, h, i} {
 		AvxAnd(a, v, a)
 	}
 	elapsed := time.Since(start)
 	log.Printf("elasped: %s\n", elapsed)
 
 }
-
 
 func Test_x64onesAccuracy(t *testing.T) {
 	a := []byte{73, 7, 84, 110, 38, 37, 58, 28, 101, 52, 89, 43, 2, 79, 112, 25, 89, 93, 35, 18, 15, 19, 95, 1, 60, 85, 83, 42, 84, 25, 60, 74, 22, 105, 48, 8, 93, 1, 95, 72, 58, 61, 74, 110, 71, 123, 17, 18, 41, 19, 104, 81, 126, 26, 62, 89, 4, 35, 35, 90, 123, 35, 46, 6, 12, 35, 31, 101, 90, 5, 38, 20, 102, 107, 127, 68, 61, 97, 60, 24, 107, 5, 62, 38, 43, 40, 111, 55, 0, 105, 85, 15, 24, 122, 47, 77, 116, 87, 18, 1, 12, 105, 22, 46, 26, 123, 76, 26, 73, 52, 52, 12, 115, 100, 8, 111, 38, 71, 122, 45, 73, 73, 27, 45, 94, 78, 112}
@@ -251,10 +248,9 @@ func Test_x64onesAccuracy(t *testing.T) {
 	}
 }
 
-
 func Test_x64zeroAccuracy(t *testing.T) {
-	a := []byte{73, 7, 84, 110, 38, 37, 58, 28, 101, 52, 89, 43, 2, 79, 112, 25, 89, 93, 35, 18, 15, 19, 95, 1, 60, 85, 83, 42, 84, 25, 60, 74, 22, 105, 48, 8, 93, 1, 95, 72, 58, 61, 74, 110, 71, 123, 17, 18, 41, 19, 104, 81, 126, 26, 62, 89, 4, 35, 35, 90, 123, 35, 46, 6, 12, 35, 31, 101, 90, 5, 38, 20, 102, 107, 127, 68, 61, 97, 60, 24, 107, 5, 62, 38, 43, 40, 111, 55, 0, 105, 85, 15, 24, 122, 47, 77, 116, 87, 18, 1, 12, 105, 22, 46, 26, 123, 76, 26, 73, 52, 52, 12, 115, 100, 8, 111, 38, 71, 122, 45, 73, 73, 27, 45, 94, 78, 112}
-	//target := make([]byte, 127)
+	a := make([]byte, 1356)
+	rand.Read(a)
 	AvxZero(a)
 	for n := range a {
 		if a[n] != 0 {
@@ -265,15 +261,13 @@ func Test_x64zeroAccuracy(t *testing.T) {
 
 }
 
-
 func Test_x64popcountAccuracy(t *testing.T) {
-	a := []byte{16,9,3,1}
+	a := []byte{16, 9, 3, 1}
 	count := AvxPopCount(a)
 	if count != 6 {
 		t.Fail()
 	}
 }
-
 
 func Test_avxpopcount(t *testing.T) {
 	a := make([]byte, 31250007)
@@ -298,25 +292,173 @@ func Test_avxpopcount(t *testing.T) {
 
 	start := time.Now()
 	total := int64(0)
-	for _, v := range [][]byte{a,b,c, d, e, f, g, h, i} {
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		total += AvxPopCount(v)
 	}
 	elapsed := time.Since(start)
 	log.Printf("pop count elasped: %s\n", elapsed)
-	log.Printf("total: %d\n",total)
+	log.Printf("total: %d\n", total)
 
 	args := []bitmap.Bitmap{}
-	for _,v := range [][]byte{a,b,c, d, e, f, g, h, i} {
-		args = append(args,GetBitMap(v))
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		args = append(args, GetBitMap(v))
 	}
 
 	start = time.Now()
 	total = 0
-	for _,v := range args{
-		
+	for _, v := range args {
+
 		total += int64(v.Count())
 	}
 	elapsed = time.Since(start)
 	log.Printf("bitmap count elasped: %s\n", elapsed)
-	log.Printf("total: %d\n",total)
+	log.Printf("total: %d\n", total)
+}
+
+func Test_And(t *testing.T) {
+	a := make([]byte, 999001)
+	b := make([]byte, 999001)
+	rand.Read(a)
+	rand.Read(b)
+	AvxAndNot(a, b, a)
+	fmt.Printf("bits: %d\n", AvxPopCount(a))
+
+}
+
+var abytes []byte
+var bbytes []byte
+var cbytes []byte
+var (
+	a, b, c, d, e, f, g, h, i, target []byte
+)
+
+func init() {
+	abytes = make([]byte, 240000009)
+	bbytes = make([]byte, 240000009)
+
+	rand.Read(abytes)
+	rand.Read(bbytes)
+	a = make([]byte, 31250007)
+	c = make([]byte, 31250007)
+	d = make([]byte, 31250007)
+	e = make([]byte, 31250007)
+	f = make([]byte, 31250007)
+	g = make([]byte, 31250007)
+	h = make([]byte, 31250007)
+	i = make([]byte, 31250007)
+	b = make([]byte, 31250007)
+	target = make([]byte, 31250007)
+	// target := make([]byte, 31250000)
+	rand.Read(a)
+	rand.Read(b)
+	rand.Read(c)
+	rand.Read(d)
+	rand.Read(e)
+	rand.Read(f)
+	rand.Read(g)
+	rand.Read(h)
+	rand.Read(i)
+}
+
+func Test_Intersect256(t *testing.T) {
+	a := []byte{4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		4, 4, 4, 4, 4, 4, 4, 4,
+		0}
+
+	count := AvxIntersection(a, a)
+	if count != 64 {
+		t.Fail()
+	}
+}
+func Test_Intersection(t *testing.T) {
+	target := make([]byte, len(abytes))
+	icount := AvxIntersection(abytes, bbytes)
+	AvxAnd(abytes, bbytes, target)
+	acount := AvxPopCount(target)
+	if acount != icount {
+		t.Fail()
+	}
+
+}
+
+func BenchmarkAnd(b *testing.B) {
+	cbytes = make([]byte, 240000009)
+	AvxAnd(abytes, bbytes, cbytes)
+	AvxPopCount(cbytes)
+}
+
+func BenchmarkIntersection(b *testing.B) {
+	AvxIntersection(abytes, bbytes)
+}
+
+func TestIntersection(T *testing.T) {
+	a := make([]byte, 31250007)
+	c := make([]byte, 31250007)
+	d := make([]byte, 31250007)
+	e := make([]byte, 31250007)
+	f := make([]byte, 31250007)
+	g := make([]byte, 31250007)
+	h := make([]byte, 31250007)
+	i := make([]byte, 31250007)
+	b := make([]byte, 31250007)
+	target := make([]byte, 31250007)
+	// target := make([]byte, 31250000)
+	rand.Read(a)
+	rand.Read(b)
+	rand.Read(c)
+	rand.Read(d)
+	rand.Read(e)
+	rand.Read(f)
+	rand.Read(g)
+	rand.Read(h)
+	rand.Read(i)
+	start := time.Now()
+	total := int64(0)
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			AvxAnd(v, z, target)
+			total += AvxPopCount(target)
+		}
+	}
+	elapsed := time.Since(start)
+	log.Printf("and/PopCount elasped: %s\n", elapsed)
+	log.Printf("total: %d\n", total)
+	start = time.Now()
+	total = int64(0)
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			total += AvxIntersection(v, z)
+		}
+	}
+	elapsed = time.Since(start)
+	log.Printf("Intersection elasped: %s\n", elapsed)
+	log.Printf("total: %d\n", total)
+
+}
+
+
+func BenchmarkIntersectionA(ba *testing.B) {
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			AvxAnd(v, z, target)
+			AvxPopCount(target)
+		}
+	}
+
+}
+
+
+func BenchmarkIntersectionB(ba *testing.B) {
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			AvxIntersection(v, z)
+		}
+	}
+
 }

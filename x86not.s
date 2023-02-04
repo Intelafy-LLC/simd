@@ -1,11 +1,11 @@
 #include "textflag.h"
 
-// func x64not(a []byte, b []byte, target []byte)
+// func x64not(a []byte, target []byte)
 // Requires: AVX, AVX2
-TEXT ·x64not(SB), NOSPLIT, $0-72
+TEXT ·x64not(SB), NOSPLIT, $0-48
 	MOVQ     a_base+0(FP), R8   // load address of a
-	MOVQ     a_base+8(FP), R11  // load length of a
-	MOVQ     c_base+24(FP), R10 // load address of target
+	MOVQ     a_len+8(FP), R11  // load length of a
+	MOVQ     target_base+24(FP), R10 // load address of target
 	XORQ     R13, R13           // Clear R13
 	VPCMPEQD Y2, Y2, Y2         // Set all bits to 1
 
@@ -74,12 +74,12 @@ bodyBytes:
 done:
 	RET
 
-// func avx512not(a []byte, b []byte, target []byte)
+// func avx512not(a []byte, target []byte)
 // Requires: AVX-512f
-TEXT ·avx512not(SB), NOSPLIT, $0-72
+TEXT ·avx512not(SB), NOSPLIT, $0-48
 	MOVQ     a_base+0(FP), R8   // load address of a
-	MOVQ     a_base+8(FP), R11  // load length of a
-	MOVQ     c_base+24(FP), R10 // load address of target
+	MOVQ     a_len+8(FP), R11  // load length of a
+	MOVQ     target_base+24(FP), R10 // load address of target
 	XORQ     R13, R13           // Clear R13
 	VPCMPEQD Y2, Y2, Y2         // Set all bits to 1
 

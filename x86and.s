@@ -5,7 +5,7 @@
 TEXT ·x64and(SB), NOSPLIT, $0-72
 	MOVQ a_base+0(FP), R8   // load address of a
 	MOVQ b_base+24(FP), R9  // load address of b
-	MOVQ c_base+48(FP), R10 // load address of target
+	MOVQ target_base+48(FP), R10 // load address of target
 	MOVQ b_len+32(FP), R11  // load length of b as count
 	XORQ R12, R12           // Clear R12
 
@@ -86,7 +86,7 @@ done:
 TEXT ·avx512and(SB), NOSPLIT, $0-72
 	MOVQ a_base+0(FP), R8   // load address of a
 	MOVQ b_base+24(FP), R9  // load address of b
-	MOVQ c_base+48(FP), R10 // load address of target
+	MOVQ target_base+48(FP), R10 // load address of target
 	MOVQ b_len+32(FP), R11  // load length of b as count
 	XORQ R12, R12           // Clear R12
 

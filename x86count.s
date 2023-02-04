@@ -1,10 +1,10 @@
 #include "textflag.h"
 
-// func x64popcount(a []byte, b []byte,target []byte)
+// func x64popcount(a []byte) int64
 // Requires: AVX, AVX2
-TEXT ·x64popcount(SB), NOSPLIT, $0-72
+TEXT ·x64popcount(SB), NOSPLIT, $0-32
 	MOVQ a_base+0(FP), R8 // load address of a
-	MOVQ a_base+8(FP), R9 // length of a
+	MOVQ a_len+8(FP), R9 // length of a
 	XORQ R15, R15         // Clear R14
 
 	CMPQ R9, $0x010 // Less than 2 quadwords remaining?
