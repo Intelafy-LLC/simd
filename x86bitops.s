@@ -6,15 +6,15 @@ TEXT ·x64has(SB), NOSPLIT, $0-33
 	MOVQ     index+24(FP), R11 			// load index
 
 	MOVQ     R11,R12	// Move index to R12 to calc bit index
-	SHRQ     $3,R11		// Calc int64 index
-	ANDQ     $7,R12  // Calc bit index 0..63
+	SHRQ     $3,R11		// Calc  index
+	ANDQ     $7,R12  // Calc bit index 
 	MOVB     R12,CL		// Move to shift register
 	MOVQ    $1,R14      // Set masking bit
-	SHLQ     CL,R14		// Shift to bit position 0..63
+	SHLQ     CL,R14		// Shift to bit position 
 	ADDQ     R11,R8     // Add index offset to address of base
-	MOVQ     (R8),R13   // load int64
+	MOVB     (R8),DL   // load data
 
-	ANDQ     R14,R13	// Test Bit set?
+	ANDB     R14,DL	// Test Bit set?
 	JZ       false
 
 	MOVB     $1,ret+32(FP)
