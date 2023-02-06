@@ -5,22 +5,17 @@ TEXT ·x64has(SB), NOSPLIT, $0-33
 	MOVQ     a_len+8(FP), R9          // load length of a
 	MOVQ     index+24(FP), R11 			// load index
 
-	MOVW     R11,CX
+	MOVB     R11,CL
 	SHRQ     $3,R11
 	CMPQ     R11,R9
 	JGE      false
-
-	XORQ     R10,R10
-	ANDW    $7,CX
-	MOVW    $1,SI
-	//SHLQ	 R11,R13
-
 	ADDQ     R11,R8
-	SHLL     CX,SI
-	MOVB     (R8),R10
-	ANDB     R10,SI
-	CMPB     SI,$0
-	JE       false
+	MOVB     (R8),BL
+	ANDB    $7,CL
+	MOVB    $1,DL
+	SHLB     CL,DL
+	ANDB     BL,DL
+	JZ       false
 
 	MOVB     $1,ret+32(FP)
 	RET

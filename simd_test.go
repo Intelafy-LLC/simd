@@ -48,14 +48,25 @@ func Test_x64orAccuracy(t *testing.T) {
 }
 
 func Test_Has(t *testing.T) {
-	c := []byte{4,4,4,4,4}
+	c := []byte{4, 4, 4, 4, 4}
 
-
-	for n := 0;n<40;n++ {
-		if x64has(c,n) {
+	for n := 0; n < 40; n++ {
+		if x64has(c, n) {
 			fmt.Println(n)
 		}
 	}
+}
+
+func BenchmarkHas(ba *testing.B) {
+	count := 0
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for n := 0; n < 31250000; n = n + 3 {
+			if X64Has(v, n) {
+				count++
+			}
+		}
+	}
+	fmt.Println(count)
 }
 
 func Test_x64and(t *testing.T) {
@@ -453,7 +464,6 @@ func TestIntersection(T *testing.T) {
 
 }
 
-
 func BenchmarkIntersectionA(ba *testing.B) {
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
@@ -463,7 +473,6 @@ func BenchmarkIntersectionA(ba *testing.B) {
 	}
 
 }
-
 
 func BenchmarkIntersectionB(ba *testing.B) {
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
