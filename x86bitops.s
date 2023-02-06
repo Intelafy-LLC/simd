@@ -1,3 +1,6 @@
+#include "textflag.h"
+
+
 // func x64ones(a []byte)
 // Requires: AVX, AVX2
 TEXT ·x64ones(SB), NOSPLIT, $0-24
