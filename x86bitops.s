@@ -1,33 +1,3 @@
-#include "textflag.h"
-// func x64has(a []byte,index int) bool
-TEXT ·x64has(SB), NOSPLIT, $0-33
-	MOVQ     a_base+0(FP), R8         // load address of a
-	//MOVQ     a_len+8(FP), R9          // load length of a
-	MOVQ     index+24(FP), R11 			// load index
-
-	MOVQ     R11,R12	// Move index to R12 to calc bit index
-	SHRQ     $3,R11		// Calc  index
-	ANDQ     $7,R12  // Calc bit index 
-	MOVB     R12,CL		// Move to shift register
-	MOVQ    $1,R14      // Set masking bit
-	SHLQ     CL,R14		// Shift to bit position 
-	ADDQ     R11,R8     // Add index offset to address of base
-	MOVB     (R8),DL   // load data
-
-	ANDB     R14,DL	// Test Bit set?
-	JZ       false
-
-	MOVB     $1,ret+32(FP)
-	RET
-
-false:
-	MOVB     $0,ret+32(FP)
-	RET
-	
-
-
-
-
 // func x64ones(a []byte)
 // Requires: AVX, AVX2
 TEXT ·x64ones(SB), NOSPLIT, $0-24
