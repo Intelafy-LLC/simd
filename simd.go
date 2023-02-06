@@ -20,6 +20,7 @@ func x64ones(a []byte)
 func x64zero(a []byte)
 func x64popcount(a []byte) int64
 func x64intersection(a,b []byte) int64
+func x64has(a []byte,index int)  bool
 
 
 
@@ -32,6 +33,7 @@ var (
 	AvxZero func([]byte)
 	AvxPopCount func([]byte)int64
 	AvxIntersection func([]byte,[]byte)int64
+	X64Has func([]byte,int)bool
 )
 
 
@@ -40,6 +42,7 @@ func init() {
 	// flag.Parse()
 	AvxPopCount = x64popcount // doesn't really use avx
 	AvxIntersection = x64intersection
+	X64Has = x64has
 	cpuid.Detect()
 	if cpuid.CPU.Supports(cpuid.AVX512F) {
 		log.Println("avx512 supported")

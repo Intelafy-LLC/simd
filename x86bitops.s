@@ -1,4 +1,36 @@
 #include "textflag.h"
+// func x64has(a []byte,index int) bool
+TEXT ·x64has(SB), NOSPLIT, $0-33
+	MOVQ     a_base+0(FP), R8         // load address of a
+	MOVQ     a_len+8(FP), R9          // load length of a
+	MOVQ     index+24(FP), R11 			// load index
+
+	MOVW     R11,CX
+	SHRQ     $3,R11
+	CMPQ     R11,R9
+	JGE      false
+	ANDW    $7,CX
+	MOVW    $1,SI
+	//SHLQ	 R11,R13
+	SHLL     CX,SI
+	ADDQ     R11,R8
+	XORQ     R10,R10
+
+	MOVB     (R8),R10
+	ANDB     R10,SI
+	CMPB     SI,$0
+	JE       false
+
+	MOVB     $1,ret+32(FP)
+	RET
+
+false:
+	MOVB     $0,ret+32(FP)
+	RET
+	
+
+
+
 
 // func x64ones(a []byte)
 // Requires: AVX, AVX2

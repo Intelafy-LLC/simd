@@ -47,6 +47,19 @@ func Test_x64orAccuracy(t *testing.T) {
 
 }
 
+func Test_Has(t *testing.T) {
+	c := []byte{4,4,4,4,4}
+
+
+	for n := 0;n<40;n++ {
+		if x64has(c,n) {
+			fmt.Println(n)
+		}
+	}
+
+
+}
+
 func Test_x64and(t *testing.T) {
 
 	a := make([]byte, 10000007)
