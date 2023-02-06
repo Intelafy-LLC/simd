@@ -56,8 +56,6 @@ func Test_Has(t *testing.T) {
 			fmt.Println(n)
 		}
 	}
-
-
 }
 
 func Test_x64and(t *testing.T) {

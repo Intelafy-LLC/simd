@@ -9,13 +9,14 @@ TEXT ·x64has(SB), NOSPLIT, $0-33
 	SHRQ     $3,R11
 	CMPQ     R11,R9
 	JGE      false
+
+	XORQ     R10,R10
 	ANDW    $7,CX
 	MOVW    $1,SI
 	//SHLQ	 R11,R13
-	SHLL     CX,SI
-	ADDQ     R11,R8
-	XORQ     R10,R10
 
+	ADDQ     R11,R8
+	SHLL     CX,SI
 	MOVB     (R8),R10
 	ANDB     R10,SI
 	CMPB     SI,$0
