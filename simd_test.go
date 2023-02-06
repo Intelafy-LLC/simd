@@ -1,6 +1,7 @@
 package simd
 
 import (
+	"unsafe"
 	"crypto/rand"
 	"fmt"
 	"log"
@@ -49,6 +50,8 @@ func Test_x64orAccuracy(t *testing.T) {
 
 func Test_Has(t *testing.T) {
 	c := []byte{4, 4, 4, 4, 4}
+	p :=  uintptr(unsafe.Pointer(&(c)[0]))
+	fmt.Println(p)
 
 	for n := 0; n < 40; n++ {
 		if x64has(c, n) {
