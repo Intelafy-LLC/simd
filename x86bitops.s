@@ -7,11 +7,11 @@ TEXT ·x64has(SB), NOSPLIT, $0-33
 
 	MOVB     R11,CL
 	SHRQ     $3,R11
+	ANDB     $7,CL
 	CMPQ     R11,R9
 	JGE      false
 	ADDQ     R11,R8
 	MOVB     (R8),BL
-	ANDB    $7,CL
 	MOVB    $1,DL
 	SHLB     CL,DL
 	ANDB     BL,DL
