@@ -48,14 +48,34 @@ func Test_x64orAccuracy(t *testing.T) {
 
 }
 
+
+func BitSet(bits []byte,bidex int) {
+	bits[uint(bidex)/8] |= 1 << (bidex % 8)
+}
+
+
 func Test_Has(t *testing.T) {
-	c := []byte{4, 4, 4, 4, 4}
+	c := make([]byte,5)
+	indexes := []int{2,3,5,7,11,13,17,19,23,29,31,37}
+	for _,v := range indexes {
+		BitSet(c,v)
+	}
+
 	p :=  uintptr(unsafe.Pointer(&(c)[0]))
 	fmt.Println(p)
 
+	found := []int{}
 	for n := 0; n < 40; n++ {
 		if x64has(c, n) {
-			fmt.Println(n)
+			found= append(found,n)
+		}
+	}
+	if len(found) != len(indexes) {
+		t.FailNow()
+	}
+	for n,v := range found {
+		if indexes[n] != v {
+			t.FailNow()
 		}
 	}
 }
@@ -86,6 +106,13 @@ func Test_x64and(t *testing.T) {
 	target := make([]byte, 10000007)
 	rand.Read(a)
 	rand.Read(b)
+	rand.Read(c)
+	rand.Read(d)
+	rand.Read(e)
+	rand.Read(f)
+	rand.Read(g)
+	rand.Read(h)
+	rand.Read(i)
 	start := time.Now()
 	for _, v := range [][]byte{b, c, d, e, f, g, h, i} {
 		AvxAnd(a, v, target)
