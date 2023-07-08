@@ -23,7 +23,7 @@ body512:
 	VMOVDQU Y0, (R10)   // write 4 qwords result to target
 	VMOVDQU Y1, 32(R10) // write next 4 qwords result to next target
 
-	// continue the interation by moving read pointers
+	// continue the iteration by moving read pointers
 	ADDQ $0x040, R8  // increment 8 qwords
 	ADDQ $0x040, R9  // increment 8 qwords
 	ADDQ $0x040, R10 // increment 8 qwords

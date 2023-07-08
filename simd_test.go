@@ -1,12 +1,13 @@
 package simd
 
 import (
-	"unsafe"
 	"crypto/rand"
 	"fmt"
 	"log"
+	"math/bits"
 	"testing"
 	"time"
+	"unsafe"
 
 	"github.com/kelindar/bitmap"
 )
@@ -439,6 +440,90 @@ func Test_Intersection(t *testing.T) {
 
 }
 
+func Test_IntersectionCounts(t *testing.T) {
+	target := make([]byte, len(abytes))
+	icount,acount,bcount := AvxIntersectionCounts(abytes, bbytes)
+	if  AvxPopCount(abytes) != acount {
+		t.FailNow()
+	}
+	bbcount:= AvxPopCount(bbytes) 
+	if bbcount != bcount {
+		t.FailNow()
+	}
+
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+	AvxAnd(abytes, bbytes, target)
+	acount = AvxPopCount(target)
+	if acount != icount {
+		t.Fail()
+	}
+
+}
+func mathCount(bytes []byte) int64 {
+	total := int64(0)
+	for _,v := range bytes {
+		total += int64(bits.OnesCount8(v))
+	}
+	return total
+}
+func Test_IntersectionCountsMedium(t *testing.T) {
+	testabytes:= make([]byte,3193)
+	testbbytes:= make([]byte,31937)
+	rand.Read(testabytes)
+	rand.Read(testbbytes)
+	target := make([]byte, len(testbbytes))
+	icount,acount,bcount := AvxIntersectionCounts(testabytes, testbbytes)
+	aacount :=  AvxPopCount(testabytes)
+
+
+	bbcount:= AvxPopCount(testbbytes) 
+	macount := mathCount(testabytes)
+	mbcount := mathCount(testbbytes)
+	AvxAnd(testabytes, testbbytes, target)
+	intersectioncount := AvxPopCount(target)
+	if intersectioncount != icount {
+		t.Fail()
+	}
+	if aacount != acount {
+		t.FailNow()
+	}
+	if bbcount != bcount {
+		t.FailNow()
+	}
+
+	fmt.Println(macount,mbcount)
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+
+}
+func Test_IntersectionCountsSmall(t *testing.T) {
+	testabytes:= make([]byte,373)
+	testbbytes:= make([]byte,373)
+	rand.Read(testabytes)
+	rand.Read(testbbytes)
+	target := make([]byte, len(testbbytes))
+	icount,acount,bcount := AvxIntersectionCounts(testabytes, testbbytes)
+	aacount :=  AvxPopCount(testabytes)
+
+
+	bbcount:= AvxPopCount(testbbytes) 
+
+	if aacount != acount {
+		t.FailNow()
+	}
+	if bbcount != bcount {
+		t.FailNow()
+	}
+
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+	AvxAnd(testabytes, testbbytes, target)
+	intersectioncount := AvxPopCount(target)
+	if intersectioncount != icount {
+		t.Fail()
+	}
+
+}
+
+
 func BenchmarkAnd(b *testing.B) {
 	cbytes = make([]byte, 240000009)
 	AvxAnd(abytes, bbytes, cbytes)
@@ -449,7 +534,7 @@ func BenchmarkIntersection(b *testing.B) {
 	AvxIntersection(abytes, bbytes)
 }
 
-func TestIntersection(T *testing.T) {
+func TestIntersection(t *testing.T) {
 	a := make([]byte, 31250007)
 	c := make([]byte, 31250007)
 	d := make([]byte, 31250007)
@@ -471,26 +556,29 @@ func TestIntersection(T *testing.T) {
 	rand.Read(h)
 	rand.Read(i)
 	start := time.Now()
-	total := int64(0)
+	poptotal := int64(0)
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
 			AvxAnd(v, z, target)
-			total += AvxPopCount(target)
+			poptotal += AvxPopCount(target)
 		}
 	}
 	elapsed := time.Since(start)
 	log.Printf("and/PopCount elasped: %s\n", elapsed)
-	log.Printf("total: %d\n", total)
+	log.Printf("total: %d\n", poptotal)
 	start = time.Now()
-	total = int64(0)
+	itotal := int64(0)
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
-			total += AvxIntersection(v, z)
+			itotal += AvxIntersection(v, z)
 		}
 	}
 	elapsed = time.Since(start)
 	log.Printf("Intersection elasped: %s\n", elapsed)
-	log.Printf("total: %d\n", total)
+	log.Printf("total: %d\n", itotal)
+	if itotal!=poptotal {
+		t.Fail()
+	}
 
 }
 
@@ -499,15 +587,30 @@ func BenchmarkIntersectionA(ba *testing.B) {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
 			AvxAnd(v, z, target)
 			AvxPopCount(target)
+			AvxPopCount(v)
+			AvxPopCount(z)
 		}
 	}
 
 }
 
+
 func BenchmarkIntersectionB(ba *testing.B) {
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
 			AvxIntersection(v, z)
+			AvxPopCount(v)
+			AvxPopCount(z)
+		}
+	}
+
+}
+
+
+func BenchmarkIntersectionC(ba *testing.B) {
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			AvxIntersectionCounts(v, z)
 		}
 	}
 

@@ -1,7 +1,7 @@
 #include "textflag.h"
 
-// func x64popcount(a []byte) int64
-// Requires: AVX, AVX2
+//func x64popcount(a []byte) int64
+//Requires: AVX, AVX2
 TEXT ·x64popcount(SB), NOSPLIT, $0-32
 	MOVQ a_base+0(FP), R8 // load address of a
 	MOVQ a_len+8(FP), R9 // length of a
@@ -49,3 +49,4 @@ body1:
 done:
 	MOVQ R15, ret+24(FP) // Return counts
 	RET
+
