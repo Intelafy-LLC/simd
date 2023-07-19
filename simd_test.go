@@ -466,6 +466,38 @@ func mathCount(bytes []byte) int64 {
 	}
 	return total
 }
+
+func Test_IntersectionCountsRight(t *testing.T) {
+	target := make([]byte, len(abytes))
+	icount,bcount := AvxIntersectionCountsRight(abytes, bbytes)
+	aacount := AvxPopCount(abytes)
+	bbcount:= AvxPopCount(bbytes) 
+
+
+	avxicount,avxacount,avxbcount := AvxIntersectionCounts(abytes,bbytes)
+	fmt.Printf("i: %d --  b: %d\n ",icount,bcount)
+	AvxAnd(abytes, bbytes, target)
+	targetcount := AvxPopCount(target)
+	if targetcount != icount {
+		t.Fail()
+	}
+	if bcount != bbcount {
+		t.Fail()
+	}
+	if aacount != avxacount {
+		t.Fail()
+	}
+	if bcount != avxbcount {
+		t.Fail()
+	}
+	if icount != avxicount {
+		t.Fail()
+	}
+
+}
+
+
+
 func Test_IntersectionCountsMedium(t *testing.T) {
 	testabytes:= make([]byte,3193)
 	testbbytes:= make([]byte,31937)
@@ -614,4 +646,12 @@ func BenchmarkIntersectionC(ba *testing.B) {
 		}
 	}
 
+}
+
+func BenchmarkIntersectionD(ba *testing.B) {
+	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
+		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
+			AvxIntersectionCountsRight(v, z)
+		}
+	}
 }
