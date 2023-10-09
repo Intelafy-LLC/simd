@@ -12,6 +12,116 @@ import (
 	"github.com/kelindar/bitmap"
 )
 
+func simpleor(a, b, c []byte) {
+	for n, v := range a {
+		c[n] = v | b[n]
+	}
+}
+
+// func BenchmarkAvx512And(ba *testing.B) {
+// 	list := [][]byte{a, b, c, d, e, f, g, h, i}
+// 	target := make([]byte,len(a))
+// 	for i := 0;i<len(list)-2;i++ {
+// 		for n := i+1;n<len(list);n++ {
+// 			avx512and(list[i],list[n],target)
+// 		}
+// 	}
+// }
+
+// func BenchmarkAvx512Or(ba *testing.B) {
+// 	list := [][]byte{a, b, c, d, e, f, g, h, i}
+// 	target := make([]byte,len(a))
+// 	for i := 0;i<len(list)-2;i++ {
+// 		for n := i+1;n<len(list);n++ {
+// 			avx512or(list[i],list[n],target)
+// 		}
+// 	}
+// }
+
+func RunBench(fn func([]byte, []byte, []byte)) {
+	list := [][]byte{a, b, c, d, e, f, g, h, i}
+	target := make([]byte, len(a))
+	for i := 0; i < len(list)-2; i++ {
+		for n := i + 1; n < len(list); n++ {
+			fn(list[i], list[n], target)
+		}
+	}
+}
+
+// func BenchmarkX64And(ba *testing.B) {
+// 	list := [][]byte{a, b, c, d, e, f, g, h, i}
+// 	target := make([]byte,len(a))
+// 	for i := 0;i<len(list)-2;i++ {
+// 		for n := i+1;n<len(list);n++ {
+// 			x64and(list[i],list[n],target)
+// 		}
+// 	}
+// }
+
+func BenchmarkX64And(b *testing.B) {
+	RunBench(x64and)
+}
+
+func BenchmarkX64Or(b *testing.B) {
+	RunBench(x64or)
+}
+
+func BenchmarkAndNot(b *testing.B) {
+	RunBench(x64andnot)
+}
+
+func BenchmarkSimpleor(b *testing.B) {
+	RunBench(simpleor)
+}
+
+func BenchmarkValidate(ba *testing.B) {
+	list := [][]byte{a, b, c, d, e, f, g, h, i}
+	target := make([]byte, len(a))
+	target2 := make([]byte, len(a))
+	for i := 0; i < len(list)-2; i++ {
+		for n := i + 1; n < len(list); n++ {
+			x64not(list[n], target)
+			x64and(list[i], target, target)
+			x64andnot(list[i], list[n], target2)
+			for n := range target {
+				if target[n] != target2[n] {
+					ba.FailNow()
+				}
+			}
+		}
+	}
+}
+
+// func Test_AVX512(t *testing.T) {
+// 	if !isAVX512F {
+// 		return
+// 	}
+// 	a := make([]byte, 31250000)
+// 	b := make([]byte, 31250000)
+// 	target := make([]byte, 31250000)
+// 	_64target := make([]byte, 31250000)
+// 	_512target := make([]byte, 31250000)
+// 	rand.Read(a)
+// 	rand.Read(b)
+// 	x64or(a, b, _64target)
+// 	avx512or(a, b, _512target)
+// 	x64andnot(_64target, _512target, target)
+// 	for _, v := range target {
+// 		if v != 0 {
+// 			t.FailNow()
+// 		}
+// 	}
+// 	x64and(a, b, _64target)
+// 	avx512and(a, b, _512target)
+// 	x64andnot(_64target, _512target, target)
+// 	for _, v := range target {
+// 		if v != 0 {
+// 			t.FailNow()
+// 		}
+// 	}
+
+// }
+
 func Test_x64or(t *testing.T) {
 
 	a := make([]byte, 31250000)
@@ -49,32 +159,30 @@ func Test_x64orAccuracy(t *testing.T) {
 
 }
 
-
-func BitSet(bits []byte,bidex int) {
+func BitSet(bits []byte, bidex int) {
 	bits[uint(bidex)/8] |= 1 << (bidex % 8)
 }
 
-
 func Test_Has(t *testing.T) {
-	c := make([]byte,5)
-	indexes := []int{2,3,5,7,11,13,17,19,23,29,31,37}
-	for _,v := range indexes {
-		BitSet(c,v)
+	c := make([]byte, 5)
+	indexes := []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37}
+	for _, v := range indexes {
+		BitSet(c, v)
 	}
 
-	p :=  uintptr(unsafe.Pointer(&(c)[0]))
+	p := uintptr(unsafe.Pointer(&(c)[0]))
 	fmt.Println(p)
 
 	found := []int{}
 	for n := 0; n < 40; n++ {
 		if x64has(c, n) {
-			found= append(found,n)
+			found = append(found, n)
 		}
 	}
 	if len(found) != len(indexes) {
 		t.FailNow()
 	}
-	for n,v := range found {
+	for n, v := range found {
 		if indexes[n] != v {
 			t.FailNow()
 		}
@@ -164,7 +272,11 @@ func Test_x64andnotAccuracy(t *testing.T) {
 	b := []byte{63, 90, 114, 126, 28, 22, 1, 111, 44, 49, 98, 40, 43, 69, 30, 82, 8, 10, 125, 125, 125, 107, 8, 28, 41, 37, 109, 46, 82, 1, 44, 61, 87, 24, 61, 24, 3, 102, 1, 63, 89, 92, 73, 27, 57, 74, 109, 59, 11, 70, 32, 44, 61, 72, 26, 37, 15, 2, 64, 1, 96, 84, 115, 10, 113, 124, 12, 60, 22, 110, 97, 23, 32, 109, 30, 60, 119, 12, 83, 59, 85, 121, 27, 58, 4, 108, 123, 125, 119, 23, 99, 29, 54, 113, 108, 29, 108, 4, 15, 104, 89, 1, 90, 98, 30, 76, 81, 96, 0, 95, 97, 69, 86, 78, 88, 38, 118, 11, 75, 70, 9, 29, 38, 22, 125, 10, 8}
 	c := []byte{64, 5, 4, 0, 34, 33, 58, 16, 65, 4, 25, 3, 0, 10, 96, 9, 81, 85, 2, 2, 2, 16, 87, 1, 20, 80, 18, 0, 4, 24, 16, 66, 0, 97, 0, 0, 92, 1, 94, 64, 34, 33, 2, 100, 70, 49, 16, 0, 32, 17, 72, 81, 66, 18, 36, 88, 0, 33, 35, 90, 27, 35, 12, 4, 12, 3, 19, 65, 72, 1, 6, 0, 70, 2, 97, 64, 8, 97, 44, 0, 42, 4, 36, 4, 43, 0, 4, 2, 0, 104, 20, 2, 8, 10, 3, 64, 16, 83, 16, 1, 4, 104, 4, 12, 0, 51, 12, 26, 73, 32, 20, 8, 33, 32, 0, 73, 0, 68, 48, 41, 64, 64, 25, 41, 2, 68, 112}
 	target := make([]byte, 127)
-	AvxAndNot(a, b, target)
+	x64andnot(a, b, target)
+	//AvxAndNot(a, b, target)
+	//AvxNot(b, b)
+	//AvxAnd(a, b, target)
+	//AvxNot(target, target)
 	for n := range a {
 		if target[n] != c[n] {
 			fmt.Printf("%d not equal\n", n)
@@ -315,9 +427,10 @@ func Test_x64zeroAccuracy(t *testing.T) {
 }
 
 func Test_x64popcountAccuracy(t *testing.T) {
-	a := []byte{16, 9, 3, 1}
+	a := []byte{26,114,84,100,59,181,149,246,137,220,113,111,116,4,252,159,124,190,184,8,44,61,15,242,74,135,183,30,209,38,75,166,175,193,120,121,116,217,164,47,69,54,16,44,99,181,154,172,153,177,65,206,172,217,148,179,186,0,220,136,5,103,201,168,97,24,213,30,199,19,76,91,13,137,56,113,13,210,251,18,168,155,96,39,40,143,114,83,167,192,42,116,223,86,61,253,171,67,17,59,78,78,218,132,11,79,78,240,75,102,97,112,232,190,131,3,148,176,214,102,155,76,138,178,78,169,114,93,170,27,94,140,130,250,120,198,149,167,73,16,157,124,87,205,24,141,195,27,55,113,50,246,203,214,180,31,136,81,18,184,44,158,254,88,104,152,87,231,131,62,125,110,180,106,42,4,39,105,250,64}
+	//a := []byte{16, 9, 3, 1}
 	count := AvxPopCount(a)
-	if count != 6 {
+	if count != 709 {
 		t.Fail()
 	}
 }
@@ -442,16 +555,16 @@ func Test_Intersection(t *testing.T) {
 
 func Test_IntersectionCounts(t *testing.T) {
 	target := make([]byte, len(abytes))
-	icount,acount,bcount := AvxIntersectionCounts(abytes, bbytes)
-	if  AvxPopCount(abytes) != acount {
+	icount, acount, bcount := AvxIntersectionCounts(abytes, bbytes)
+	if AvxPopCount(abytes) != acount {
 		t.FailNow()
 	}
-	bbcount:= AvxPopCount(bbytes) 
+	bbcount := AvxPopCount(bbytes)
 	if bbcount != bcount {
 		t.FailNow()
 	}
 
-	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ", icount, acount, bcount)
 	AvxAnd(abytes, bbytes, target)
 	acount = AvxPopCount(target)
 	if acount != icount {
@@ -461,7 +574,7 @@ func Test_IntersectionCounts(t *testing.T) {
 }
 func mathCount(bytes []byte) int64 {
 	total := int64(0)
-	for _,v := range bytes {
+	for _, v := range bytes {
 		total += int64(bits.OnesCount8(v))
 	}
 	return total
@@ -469,13 +582,12 @@ func mathCount(bytes []byte) int64 {
 
 func Test_IntersectionCountsRight(t *testing.T) {
 	target := make([]byte, len(abytes))
-	icount,bcount := AvxIntersectionCountsRight(abytes, bbytes)
+	icount, bcount := AvxIntersectionCountsRight(abytes, bbytes)
 	aacount := AvxPopCount(abytes)
-	bbcount:= AvxPopCount(bbytes) 
+	bbcount := AvxPopCount(bbytes)
 
-
-	avxicount,avxacount,avxbcount := AvxIntersectionCounts(abytes,bbytes)
-	fmt.Printf("i: %d --  b: %d\n ",icount,bcount)
+	avxicount, avxacount, avxbcount := AvxIntersectionCounts(abytes, bbytes)
+	fmt.Printf("i: %d --  b: %d\n ", icount, bcount)
 	AvxAnd(abytes, bbytes, target)
 	targetcount := AvxPopCount(target)
 	if targetcount != icount {
@@ -496,19 +608,16 @@ func Test_IntersectionCountsRight(t *testing.T) {
 
 }
 
-
-
 func Test_IntersectionCountsMedium(t *testing.T) {
-	testabytes:= make([]byte,3193)
-	testbbytes:= make([]byte,31937)
+	testabytes := make([]byte, 31937)
+	testbbytes := make([]byte, 31937)
 	rand.Read(testabytes)
 	rand.Read(testbbytes)
 	target := make([]byte, len(testbbytes))
-	icount,acount,bcount := AvxIntersectionCounts(testabytes, testbbytes)
-	aacount :=  AvxPopCount(testabytes)
+	icount, acount, bcount := AvxIntersectionCounts(testabytes, testbbytes)
+	aacount := AvxPopCount(testabytes)
 
-
-	bbcount:= AvxPopCount(testbbytes) 
+	bbcount := AvxPopCount(testbbytes)
 	macount := mathCount(testabytes)
 	mbcount := mathCount(testbbytes)
 	AvxAnd(testabytes, testbbytes, target)
@@ -523,21 +632,20 @@ func Test_IntersectionCountsMedium(t *testing.T) {
 		t.FailNow()
 	}
 
-	fmt.Println(macount,mbcount)
-	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+	fmt.Println(macount, mbcount)
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ", icount, acount, bcount)
 
 }
 func Test_IntersectionCountsSmall(t *testing.T) {
-	testabytes:= make([]byte,373)
-	testbbytes:= make([]byte,373)
+	testabytes := make([]byte, 373)
+	testbbytes := make([]byte, 373)
 	rand.Read(testabytes)
 	rand.Read(testbbytes)
 	target := make([]byte, len(testbbytes))
-	icount,acount,bcount := AvxIntersectionCounts(testabytes, testbbytes)
-	aacount :=  AvxPopCount(testabytes)
+	icount, acount, bcount := AvxIntersectionCounts(testabytes, testbbytes)
+	aacount := AvxPopCount(testabytes)
 
-
-	bbcount:= AvxPopCount(testbbytes) 
+	bbcount := AvxPopCount(testbbytes)
 
 	if aacount != acount {
 		t.FailNow()
@@ -546,7 +654,7 @@ func Test_IntersectionCountsSmall(t *testing.T) {
 		t.FailNow()
 	}
 
-	fmt.Printf("i: %d -- a: %d -- b: %d\n ",icount,acount,bcount)
+	fmt.Printf("i: %d -- a: %d -- b: %d\n ", icount, acount, bcount)
 	AvxAnd(testabytes, testbbytes, target)
 	intersectioncount := AvxPopCount(target)
 	if intersectioncount != icount {
@@ -554,7 +662,6 @@ func Test_IntersectionCountsSmall(t *testing.T) {
 	}
 
 }
-
 
 func BenchmarkAnd(b *testing.B) {
 	cbytes = make([]byte, 240000009)
@@ -608,7 +715,7 @@ func TestIntersection(t *testing.T) {
 	elapsed = time.Since(start)
 	log.Printf("Intersection elasped: %s\n", elapsed)
 	log.Printf("total: %d\n", itotal)
-	if itotal!=poptotal {
+	if itotal != poptotal {
 		t.Fail()
 	}
 
@@ -626,7 +733,6 @@ func BenchmarkIntersectionA(ba *testing.B) {
 
 }
 
-
 func BenchmarkIntersectionB(ba *testing.B) {
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
 		for _, z := range [][]byte{a, b, c, d, e, f, g, h, i} {
@@ -637,7 +743,6 @@ func BenchmarkIntersectionB(ba *testing.B) {
 	}
 
 }
-
 
 func BenchmarkIntersectionC(ba *testing.B) {
 	for _, v := range [][]byte{a, b, c, d, e, f, g, h, i} {
