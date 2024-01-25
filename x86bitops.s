@@ -97,8 +97,8 @@ TEXT ·x64zero(SB), NOSPLIT, $0-24
 	JL   tail512
 
 body512:
-	VMOVDQU Y2, (R8)   // write 4 qwords result over a
-	VMOVDQU Y2, 32(R8) // write 4 qwords result over a
+	VMOVDQA Y2, (R8)   // write 4 qwords result over a
+	VMOVDQA Y2, 32(R8) // write 4 qwords result over a
 
 	// continue the interation by moving read pointers
 	ADDQ $0x040, R8  // increment 8 qwords

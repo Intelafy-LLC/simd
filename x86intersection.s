@@ -16,8 +16,8 @@ TEXT ·x64intersectioncounts(SB), NOSPLIT, $0-56
 	// process 16 bytes at a time
 body16:
 
-	VMOVDQU (R8), X2
-	VMOVDQU (R9), X3      // load 2 qwords from b into X0
+	VMOVDQA (R8), X2
+	VMOVDQA (R9), X3      // load 2 qwords from b into X0
 	VPAND   X2, X3, X0    // and 2 qwords at (a) with X0 into X1
 	MOVQ    X0, R12       // Get low qword
 	POPCNTQ R12, R12      // count bits

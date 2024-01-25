@@ -14,8 +14,8 @@ TEXT ·x64not(SB), NOSPLIT, $0-48
 	JL   tail512
 
 body512:
-	VMOVDQU (R8), Y0    // load 4 qwords from a into Y0
-	VMOVDQU 32(R8), Y1  // load next 4 qwords from a into Y1
+	VMOVDQA (R8), Y0    // load 4 qwords from a into Y0
+	VMOVDQA 32(R8), Y1  // load next 4 qwords from a into Y1
 	VPXOR   Y2, Y0, Y0
 	VPXOR   Y2, Y1, Y1
 	VMOVDQU Y0, (R10)   // write 4 qwords result over a
