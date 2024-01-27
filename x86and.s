@@ -10,7 +10,7 @@ TEXT ·x64and(SB), NOSPLIT, $0-72
 	XORQ R12, R12           // Clear R12
 
 	// perform vectorized operation for every block of 512 bits
-	CMPQ R11, $0x040 // Less than 8 quadwords remaining?
+	CMPQ R11, $0x020 // Less than 4 quadwords remaining?
 	JL   tail256
 
 body256:
