@@ -1,5 +1,5 @@
 #include "textflag.h"
-
+//***  if thes bytes are not aligned on 256 bit boundary -- will cause seg fault
 // func x64or(a []byte, b []byte,target []byte)
 // Requires: AVX, AVX2
 TEXT ·x64or(SB), NOSPLIT, $0-72
@@ -10,10 +10,12 @@ TEXT ·x64or(SB), NOSPLIT, $0-72
 	XORQ R13, R13           // Clear R13
 
 	// perform vectorized operation for every block of 512 bits
-	CMPQ R11, $0x040 // Less than 8 quadwords remaining?
+	CMPQ R11, $0x020 // Less than 4 quadwords remaining?
 	JL   tail256
 
 body256:
+//	VMOVDQU (R9), Y0    // load 4 qwords from b into Y0
+//	VMOVDQU (R8), Y2    // load 4 qwords from a into Y2
 	VMOVDQA (R9), Y0    // load 4 qwords from b into Y0
 	VMOVDQA (R8), Y2    // load 4 qwords from a into Y2
 	VPOR    Y2, Y0, Y0  // y0 = y2 or y0

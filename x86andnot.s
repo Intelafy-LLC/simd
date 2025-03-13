@@ -16,7 +16,7 @@ body256:
 	VMOVDQA (R9), Y0    // load 4 qwords from b into Y0
 	VMOVDQA (R8), Y1
 	VPANDN  Y1, Y0, Y2
-	VMOVDQA Y2, (R10)
+	VMOVDQU Y2, (R10)
 
 	// continue the interation by moving read pointers
 	ADDQ $0x020, R8  // increment 8 qwords
