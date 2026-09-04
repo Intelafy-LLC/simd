@@ -41,7 +41,13 @@ func init() {
 	AvxIntersectionCounts = x64intersectioncounts
 	AvxIntersectionCountsRight = x64intersectioncountsright
 	X64Has = x64has
-	//* No real performance boost to avx512 in these use cases
+	//* AVX-512 measured with no real boost PRE-TURIN (Zen3/pre-AVX512 and
+	//* double-pumped-Zen4 era silicon), so it was disabled here. Turin (c4d,
+	//* full-rate 512-bit) is now the primary fleet class — the audiencev3
+	//* Rust kernels reinstate AVX-512 as a runtime-capability-selected peer
+	//* path (detect once at startup, select 256/512-bit; older generations
+	//* fall back to the 256-bit baseline). See audiencev2
+	//* .planning/native-rewrite/designdocs/D3-kernels.md §3.
 	// cpuid.Detect()
 	// isAVX512F = cpuid.CPU.Supports(cpuid.AVX512F)
 	// if isAVX512F {
